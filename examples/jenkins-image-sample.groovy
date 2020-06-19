@@ -271,9 +271,14 @@ void actualTest() {*/
     
                     // exercise oc run path, including verification of proper handling of groovy cps
                     // var binding (converting List to array)
+	
+		    // Now using the jenkins image built on quay. OCP 4.2+ has a change in the oauth implementation
+		    // which prevents kubernetes-client to watch resources; so we are using 4.3+ with the appropriate 
+		    // serviceaccount and rolebinding
+			
                     def runargs1 = []
                     runargs1 << "jenkins-second-deployment"
-                    runargs1 << "--image=docker.io/openshift/jenkins-2-centos7:latest"
+                    runargs1 << "--image=quay.io/openshift/origin-jenkins:4.3"
                     runargs1 << "--dry-run"
                     runargs1 << "-o yaml"
                     openshift.run(runargs1)
@@ -281,7 +286,7 @@ void actualTest() {*/
                     // FYI - pipeline cps groovy compile does not allow String[] runargs2 =  {"jenkins-second-deployment", "--image=docker.io/openshift/jenkins-2-centos7:latest", "--dry-run"}
                     String[] runargs2 = new String[4]
                     runargs2[0] = "jenkins-second-deployment"
-                    runargs2[1] = "--image=docker.io/openshift/jenkins-2-centos7:latest"
+                    runargs2[1] = "--image=quay.io/openshift/origin-jenkins:4.3"
                     runargs2[2] = "--dry-run"
                     runargs2[3] = "-o yaml"
                     openshift.run(runargs2)
@@ -292,7 +297,12 @@ void actualTest() {*/
                     if (dc2Selector.exists()) {
                         openshift.delete("dc", "jenkins-second-deployment")
                     }
-                    openshift.run("jenkins-second-deployment", "--image=docker.io/openshift/jenkins-2-centos7:latest")
+		    // need to test if openshift.create('rolebinding',....) works, but poor likely that it will
+		    sh '''
+		       oc create sa jenkins2
+		       oc create rolebinding jenkins2_edit  --clusterrole=edit --serviceaccount=$(oc project -q):jenkins2
+		    '''
+                    openshift.run("jenkins-second-deployment", "--image=quay.io/openshift/origin-jenkins:4.3", "--serviceaccount=jenkins2")
                     dc2Selector.rollout().status("-w")
 
                     // Empty static / selectors are powerful tools to check the state of the system.
