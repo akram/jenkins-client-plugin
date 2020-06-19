@@ -300,7 +300,6 @@ void actualTest() {*/
 		    // need to test if openshift.create('rolebinding',....) works, but poor likely that it will
 		    sh '''
 		       oc create sa jenkins2
-		       oc create rolebinding jenkins2_edit  --clusterrole=edit --serviceaccount=$(oc project -q):jenkins2
 		    '''
                     openshift.run("jenkins-second-deployment", "--image=quay.io/openshift/origin-jenkins:4.3", "--serviceaccount=jenkins2")
                     dc2Selector.rollout().status("-w")
