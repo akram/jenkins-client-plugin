@@ -273,8 +273,7 @@ void actualTest() {*/
                     // var binding (converting List to array)
 	
 		    // Now using the jenkins image built on quay. OCP 4.2+ has a change in the oauth implementation
-		    // which prevents kubernetes-client to watch resources; so we are using 4.3+ with the appropriate 
-		    // serviceaccount and rolebinding
+		    // which prevents kubernetes-client to watch resources; so we are using 4.3+ 
 			
                     def runargs1 = []
                     runargs1 << "jenkins-second-deployment"
@@ -298,11 +297,10 @@ void actualTest() {*/
                         openshift.delete("dc", "jenkins-second-deployment")
                     }
 		    // need to test if openshift.create('rolebinding',....) works, but poor likely that it will
-		    sh '''
-		       oc create sa jenkins2
-		    '''
-                    openshift.run("jenkins-second-deployment", "--image=quay.io/openshift/origin-jenkins:4.3", "--serviceaccount=jenkins2")
+	
+                    openshift.run("jenkins-second-deployment", "--image=quay.io/openshift/origin-jenkins:4.3")
                     dc2Selector.rollout().status("-w")
+                    dc2Selector.rollout().latest()
 
                     // Empty static / selectors are powerful tools to check the state of the system.
                     // Intentionally create one using a narrow and exercise it.
