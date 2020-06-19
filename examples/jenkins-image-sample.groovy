@@ -291,6 +291,7 @@ void actualTest() {*/
                     // the overnight tests pass
                     def dc2Selector = openshift.selector("dc", "jenkins-second-deployment")
                     if (dc2Selector.exists()) {
+			echo "dc2Selector.exists() returned true"
                         openshift.delete("dc", "jenkins-second-deployment")
                     }
 	
